@@ -57,7 +57,7 @@ class BerandaFrame(ctk.CTkTabview):
         # # >> Start Style Tab Rencana << 
         self.set_tab_beranda("Selesai", data=self.models.get_hash_data()['Selesai'])
 
-    
+
     def execution_plan(self):
         # Buat pop up
         popup = ctk.CTk()
@@ -85,6 +85,7 @@ class BerandaFrame(ctk.CTkTabview):
 
         # Tampilkan pop up
         popup.mainloop()
+
     
     def set_status_tabprogres(self, key):
         # Buat pop up
@@ -197,6 +198,7 @@ class BerandaFrame(ctk.CTkTabview):
         
         self.footer_frame.pack(side="top", fill="x")
         # >> End Eksekusi << 
+
         
 # Kelas untuk SidebarFrame
 class SidebarFrame(ctk.CTkFrame):
@@ -238,11 +240,36 @@ class ManajemenFrame(ctk.CTkTabview):
         # >> Start Style Tab Rencana << 
         self.set_tab_manajemen("Edit Rencana")
 
+    def remove_plan(self, key):
+        # Buat pop up
+        popup = ctk.CTk()
+        popup.title("Konfirmasi Menghapus Rencana Pembangunan")
+        popup.geometry("320x180")
+        
+        def remove_plan(key):
+            self.models.data_hash.remove(key=key)
+            self.models.queue_plan.remove(key)
+            self.models.save_file()
+            self.models.load_file()
+            popup.destroy()
+        
+        # Tambahkan label
+        label = ctk.CTkLabel(popup, text="Apakah Anda yakin ingin menghapus rencana?\n"+key)
+        label.pack(pady=15)
 
-    def action_Manajemen(self):
-        # Implementasi tindakan Manajemen
-        tkinter.messagebox.showinfo("Action Manajemen", "Tindakan Manajemen berhasil dijalankan")
+        # Tambahkan tombol ya
+        btn_ya = ctk.CTkButton(popup, text="Ya", command=lambda:remove_plan(key=key))
+        btn_ya.pack(side="right", padx=15)
 
+        # Tambahkan tombol tidak
+        btn_tidak = ctk.CTkButton(popup, text="Tidak", command=lambda: popup.destroy())
+        btn_tidak.pack(side="right", padx=15)
+
+        # Tampilkan pop up
+        popup.mainloop()
+        
+        
+    
     def data_Manajemen(self, data):
         # Tampilkan data di body frame
         for i, data in enumerate(data):
@@ -291,7 +318,7 @@ class ManajemenFrame(ctk.CTkTabview):
         if tab_name != "Tambah Rencana Baru":
             label = ctk.CTkLabel(self.body_frame[0], text="data masuk kok")
             label.pack()
-            self.data_manejemen(self.models.get_hash_data(all_category=True))
+            self.body_manejemen(self.models.get_hash_data(all_category=True))
         
         # generate aksi di dalam frame nya
         if func is not None:
@@ -301,6 +328,7 @@ class ManajemenFrame(ctk.CTkTabview):
         self.title_frame.pack(side="top", fill="x", padx=10, pady=5)
 
         if type(self.body_frame) is list:
+            ic("masuk kok")
             for frame in self.body_frame:
                 frame.pack(side="top", fill="x", padx=10, pady=10)
         else:
@@ -311,7 +339,7 @@ class ManajemenFrame(ctk.CTkTabview):
         self.footer_frame.pack(side="top", fill="x")
     
     
-    def data_manejemen(self, data):
+    def body_manejemen(self, data):
         # Tampilan jika tidak ada data
         if len(data) == 0:
             label_zonk = ctk.CTkLabel(self.body_parent, text="Tidak ada data di dalam tab ini")
@@ -342,11 +370,11 @@ class ManajemenFrame(ctk.CTkTabview):
 
             btn_set_status_frame = ctk.CTkFrame(footer_data)
             
-            btn_set_status = ctk.CTkButton(btn_set_status_frame, text="Edit") # command=lambda:self.set_status_tabprogres(data['judul'])
+            btn_set_status = ctk.CTkButton(btn_set_status_frame, text="Edit", command=lambda:self.set_plan(action="edit", data=data))
             btn_set_status.pack(side="left", pady=10)
             btn_set_status_frame.pack(side="left", fill="x")
 
-            btn_set_status = ctk.CTkButton(btn_set_status_frame, text="Hapus") # command=lambda:self.set_status_tabprogres(data['judul'])
+            btn_set_status = ctk.CTkButton(btn_set_status_frame, text="Hapus", command=lambda:self.remove_plan(key=data["judul"]))
             btn_set_status.pack(side="left", pady=10, padx=15)
             btn_set_status_frame.pack(side="left", fill="x")
 
@@ -361,9 +389,12 @@ class ManajemenFrame(ctk.CTkTabview):
             footer_data.pack(side="bottom", fill="x", padx=5)
             footer_data.configure(fg_color="transparent")
     
-    
-    
-    def set_plan(self, action='add'):
+      
+    def set_plan(self, action='add', data={}):
+        if type(self.body_frame) == list:
+            for frame in self.body_frame:
+                frame.pack_forget()
+        
         # Label Judul
         judul_frame = ctk.CTkFrame(self.body_parent)
         label_judul = ctk.CTkLabel(judul_frame, text="Judul Projek")
@@ -374,6 +405,8 @@ class ManajemenFrame(ctk.CTkTabview):
         # Text input Judul
         input_judul_frame = ctk.CTkFrame(self.body_parent)
         input_judul = ctk.CTkEntry(input_judul_frame)
+        if action != "add":
+            input_judul.insert(0, str(data['judul']))
         input_judul.pack(side="left")
         input_judul_frame.pack(side="top", fill="x", padx=5, pady=15)
         var_judul = input_judul.get()
@@ -389,7 +422,10 @@ class ManajemenFrame(ctk.CTkTabview):
         input_deskripsi_frame = ctk.CTkFrame(self.body_parent)
         input_deskripsi = ctk.CTkTextbox(input_deskripsi_frame, width=400, corner_radius=1)
         input_deskripsi.grid(row=0, column=0, sticky="nsew")
-        input_deskripsi.insert("0.0", "Tulis Deskripsi disini")
+        if action != "add":
+            input_deskripsi.insert("0.0", data['deskripsi']+"Hello")
+        else:
+            input_deskripsi.insert("0.0", "Tulis Deskripsi disini")
         input_deskripsi_frame.pack(side="top", fill="x", padx=5, pady=15)
         
         # Label prioritas
@@ -402,6 +438,8 @@ class ManajemenFrame(ctk.CTkTabview):
         # Text input prioritas
         input_prioritas_frame = ctk.CTkFrame(self.body_parent)
         input_prioritas = ctk.CTkEntry(input_prioritas_frame)
+        if action != "add":
+            input_prioritas.insert(0, data['prioritas'])
         input_prioritas.pack(side="left")
         input_prioritas_frame.pack(side="top", fill="x", padx=5, pady=15)
         
@@ -418,7 +456,15 @@ class ManajemenFrame(ctk.CTkTabview):
         btn_progres = ctk.CTkRadioButton(radio_btn_status, text="Progres", variable=var_status, value=2)
         btn_selesai = ctk.CTkRadioButton(radio_btn_status, text="Selesai", variable=var_status, value=3)
         
-        btn_rencana.select()
+        if action != "add":
+            if data['status'] == 'rencana':
+                btn_rencana.select()
+            if data['status'] == 'progres':
+                btn_progres.select()
+            if data['status'] == 'selesai':
+                btn_selesai.select()
+        else:
+            btn_rencana.select()
         
         btn_rencana.pack(side="right")
         btn_progres.pack(side="right")
@@ -449,6 +495,7 @@ class ManajemenFrame(ctk.CTkTabview):
         
         btn_action = ctk.CTkButton(self.footer_frame, text="Simpan Rencana", command=action)
         btn_action.pack(padx=35, pady=10, side="right")
+
 
 # Kelas untuk App
 class App(ctk.CTk):

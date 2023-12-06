@@ -105,6 +105,12 @@ class PriorityQueue:
         for data in self.queue:
             if data[0] == value['element']:
                 data = (value['element'], value['priority'])
+    
+    def remove(self, key):
+        # Menghapus elemen dengan kunci sama dengan parameter
+        for data in self.queue:
+            if data[0] == key:
+                self.queue.remove((key, data[1]))
 
 # Class Operasi dengan database / struktur data 
 class Models:
