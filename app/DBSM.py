@@ -1,4 +1,5 @@
 import json
+from icecream import ic
 
 # Struktur data hashtable
 class HashTable:
@@ -19,7 +20,6 @@ class HashTable:
 
     def get(self, key):
         index = self.hash_function(key)
-        ic(index)
         slot = self.table[index]
         if slot is not None and key in slot:
             return slot[key]
@@ -43,6 +43,10 @@ class HashTable:
             for key, value in slot.items():
                 all_data.append({key: value})
         return all_data
+    
+    def set_status(self, key, status):
+        index = self.hash_function(key)
+        self.table[index][key]['status'] = status
 
 # Struktur data Priority Queue
 class PriorityQueue:
@@ -60,7 +64,7 @@ class PriorityQueue:
         else:
             inserted = False
             for i in range(len(self.queue)):
-                if priority < self.queue[i][1]:
+                if ic(ic(priority) > ic(self.queue[i][1])):
                     self.queue.insert(i, item)
                     inserted = True
                     break
@@ -132,7 +136,8 @@ class Models:
         #   key = "Pembangunan A" -> str
         #   value = "{'deskripsi':'Deskripsi 1', 'status':'Do it', 'priority' : 2}" -> dict
         
-        self.queue_plan.enqueue(key, value['priority'])
+        if value['status'] == "rencana":
+            self.queue_plan.enqueue(key, value['priority'])
         self.data_hash.insert(key, value)
     
     def get_queue_data(self):
@@ -149,8 +154,50 @@ class Models:
                         "status": hash_data[queue[0]]['status'],
                         "prioritas": hash_data[queue[0]]['priority']
                     })
-        return result
+
+        # Mengurutkan hasil berdasarkan prioritas tertinggi
+        sorted_result = sorted(result, key=lambda x: x["prioritas"], reverse=True)
+
+        return sorted_result
+
     
-    def get_hash_data(self):
-        # Mengambil semua data didalam hash table
-        return self.data_hash.get_all()
+    def get_hash_data(self, all_category=False):
+        # Mengambil semua data dalam hash table
+        all_data_hash = self.data_hash.get_all()
+        
+        # Mengembalikan semua data tanpa sortir
+        if all_category:
+            result = []
+            for data in all_data_hash:
+                data_result = {
+                        "judul": list(data)[0],
+                        "deskripsi": data[list(data)[0]]['deskripsi'],
+                        "status": data[list(data)[0]]['status'],
+                        "prioritas": data[list(data)[0]]['priority']
+                    }
+                result.append(data_result)
+            return result
+
+        # Memisahkan data ke dalam kategori
+        category = {
+            "Rencana": [],
+            "Progres": [],
+            "Selesai": []
+        }
+
+        for data in all_data_hash:
+            status = data[list(data)[0]]['status']
+            data_result = {
+                        "judul": list(data)[0],
+                        "deskripsi": data[list(data)[0]]['deskripsi'],
+                        "status": data[list(data)[0]]['status'],
+                        "prioritas": data[list(data)[0]]['priority']
+                    }
+            if status == 'rencana':
+                category["Rencana"].append(data_result)
+            elif status == 'progres':
+                category["Progres"].append(data_result)
+            elif status == 'selesai':
+                category["Selesai"].append(data_result)
+
+        return category
