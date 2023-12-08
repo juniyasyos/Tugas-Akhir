@@ -316,8 +316,6 @@ class ManajemenFrame(ctk.CTkTabview):
         
         # generate data dalam frame
         if tab_name != "Tambah Rencana Baru":
-            label = ctk.CTkLabel(self.body_frame[0], text="data masuk kok")
-            label.pack()
             self.body_manejemen(self.models.get_hash_data(all_category=True))
         
         # generate aksi di dalam frame nya
@@ -423,7 +421,7 @@ class ManajemenFrame(ctk.CTkTabview):
         input_deskripsi = ctk.CTkTextbox(input_deskripsi_frame, width=400, corner_radius=1)
         input_deskripsi.grid(row=0, column=0, sticky="nsew")
         if action != "add":
-            input_deskripsi.insert("0.0", data['deskripsi']+"Hello")
+            input_deskripsi.insert("0.0", data['deskripsi'])
         else:
             input_deskripsi.insert("0.0", "Tulis Deskripsi disini")
         input_deskripsi_frame.pack(side="top", fill="x", padx=5, pady=15)

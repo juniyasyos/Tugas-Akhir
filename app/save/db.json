@@ -1,6 +1,9 @@
 {
   "QueuePriority": {
-    "queue": []
+    "queue": [
+      ["Pembangunan Gedung B", 5],
+      ["Pembangunan Gedung A", 4]
+    ]
   },
   "HashTable": {
     "size": 100,
@@ -13,10 +16,22 @@
       {},
       {},
       {},
+      {
+        "Pembangunan Gedung A": {
+          "deskripsi": "Pembangunan ini penting untuk koruptor\n",
+          "status": "rencana",
+          "priority": 4
+        }
+      },
       {},
       {},
-      {},
-      {},
+      {
+        "Pembangunan Gedung B": {
+          "deskripsi": "Deskripsi B",
+          "status": "rencana",
+          "priority": 5
+        }
+      },
       {},
       {},
       {},
